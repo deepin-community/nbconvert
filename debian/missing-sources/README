@@ -1,0 +1,7 @@
+Jupyterlab CSS files, pending packaging of Jupyterlab, from (as per setup.py)
+
+https://unpkg.com/@jupyterlab/nbconvert-css@3.0.7/style/index.css
+https://unpkg.com/@jupyterlab/theme-light-extension@3.0.7/style/variables.css
+https://unpkg.com/@jupyterlab/theme-dark-extension@3.0.7/style/variables.css
+
+These are licensed under the same Modified BSD license as the rest of Jupyter.

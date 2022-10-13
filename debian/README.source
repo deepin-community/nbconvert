@@ -1,0 +1,8 @@
+The setup attempts to download the notebook CSS style from a CDN address [1].
+This is replaced with the equivalent file from python3-notebook, which is
+which is built from less files during that package's build process.
+
+(The CDN contains the static resources from the notebook package [2])
+
+[1]: https://cdn.jupyter.org/notebook/%s/style/style.min.css % notebookversion
+[2]: https://github.com/jupyter/cdn.jupyter.org

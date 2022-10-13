@@ -1,0 +1,22 @@
+From: Gordon Ball <gordon@chronitis.net>
+Date: Thu, 26 Jan 2017 13:47:34 +0100
+Subject: Disable downloading CSS from the web,
+ since we can copy it directly from the notebook package instead
+Forwarded: Debian-specific
+
+---
+ setup.py | 3 ---
+ 1 file changed, 3 deletions(-)
+
+--- nbconvert.orig/setup.py
++++ nbconvert/setup.py
+@@ -144,9 +144,6 @@
+             return command.run(self)
+     return CSSFirst
+ 
+-cmdclass['build'] = css_first(build)
+-cmdclass['sdist'] = css_first(sdist)
+-cmdclass['develop'] = css_first(develop)
+ cmdclass['bdist_egg'] = bdist_egg if 'bdist_egg' in sys.argv else bdist_egg_disabled
+ 
+ for d, _, _ in os.walk(pjoin(pkg_root, 'templates')):

@@ -1,0 +1,127 @@
+.TH JUPYTER-NBCONVERT "1" "October 2015" "jupyter-nbconvert 4.0.0" "User Commands"
+.SH NAME
+jupyter-nbconvert \- Convert notebook files (*.ipynb) to various other formats.
+.SH DESCRIPTION
+.PP
+WARNING: THE COMMANDLINE INTERFACE MAY CHANGE IN FUTURE RELEASES.
+.PP
+Arguments that take values are actually convenience aliases to full
+Configurables, whose aliases are listed on the help line. For more information
+on full configurables, see '\-\-help\-all'.
+.PP
+\fB\-y\fR
+.IP
+Answer yes to any questions instead of prompting.
+.PP
+\fB\-\-execute\fR
+.IP
+Execute the notebook prior to export.
+.PP
+\fB\-\-allow\-errors\fR
+.IP
+Continue notebook execution even if one of the cells throws an error and include the error message in the cell output (the default behaviour is to abort conversion). This flag is only relevant if '\-\-execute' was specified, too.
+.PP
+\fB\-\-stdout\fR
+.IP
+Write notebook output to stdout instead of files.
+.PP
+\fB\-\-debug\fR
+.IP
+set log level to logging.DEBUG (maximize logging output)
+.PP
+\fB\-\-inplace\fR
+.IP
+Run nbconvert in place, overwriting the existing notebook (only
+relevant when converting to notebook format)
+.PP
+\fB\-\-generate\-config\fR
+.IP
+generate default config file
+.PP
+\fB\-\-reveal\-prefix=\fR<Unicode> (RevealHelpPreprocessor.url_prefix)
+.IP
+The URL prefix for reveal.js. This can be a a relative URL for a local copy
+of reveal.js, or point to a CDN. For speaker notes to work, a local reveal.js
+prefix must be used. (default: 'reveal.js')
+.PP
+\fB\-\-nbformat=\fR<Enum> (NotebookExporter.nbformat_version)
+.IP
+The nbformat version to write. Use this to downgrade notebooks.
+Choices: [1, 2, 3, 4] (with default 4)
+.PP
+\fB\-\-writer=\fR<DottedObjectName> (NbConvertApp.writer_class)
+.IP
+Writer class used to write the  results of the conversion
+(default: 'FilesWriter')
+.PP
+\fB\-\-log\-level=\fR<Enum> (Application.log_level)
+.IP
+Set the log level by value or name. Choices: (0, 10, 20, 30, 40, 50, 'DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL') (default: 30)
+
+.PP
+\fB\-\-to=\fR<CaselessStrEnum> (NbConvertApp.export_format)
+.IP
+The export format to be used. Choices: ['custom', 'html', 'latex', 'markdown',
+ 'notebook', 'pdf', 'python', 'rst', 'script', 'slides'] (default: 'html')
+.PP
+\fB\-\-template=\fR<Unicode> (TemplateExporter.template_file)
+.IP
+Name of the template file to use (default: u'')
+.PP
+\fB\-\-output=\fR<Unicode> (NbConvertApp.output_base)
+.IP
+overwrite base name use for output files. can only be used when converting
+one notebook at a time (default: '').
+.PP
+\fB\-\-post=\fR<DottedOrNone> (NbConvertApp.postprocessor_class)
+.IP
+PostProcessor class used to write the results of the conversion (default u'')
+.PP
+\fB\-\-config=\fR<Unicode> (JupyterApp.config_file)
+.IP
+Full path of a config file (default: u'').
+.PP
+To see all available configurables, use `\-\-help\-all`
+.SH EXAMPLES
+.PP
+The simplest way to use nbconvert is
+.IP
+\fBjupyter nbconvert mynotebook.ipynb\fR
+.PP
+which will convert mynotebook.ipynb to the default format (probably HTML).
+.PP
+You can specify the export format with `\-\-to`.
+Options include ['custom', 'html', 'latex', 'markdown', 'notebook', 'pdf', 'python', 'rst', 'script', 'slides']
+.IP
+\fBjupyter nbconvert --to latex mynotebook.ipynb\fR
+.PP
+Both HTML and LaTeX support multiple output templates. LaTeX includes
+\&'base', 'article' and 'report'.  HTML includes 'basic' and 'full'. You
+can specify the flavor of the format used.
+.IP
+\fBjupyter nbconvert --to html --template basic mynotebook.ipynb\fR
+.PP
+You can also pipe the output to stdout, rather than a file
+.IP
+\fBjupyter nbconvert mynotebook.ipynb --stdout\fR
+.PP
+PDF is generated via latex
+.IP
+\fBjupyter nbconvert mynotebook.ipynb --to pdf\fR
+.PP
+You can get (and serve) a Reveal.js\-powered slideshow
+.IP
+\fBjupyter nbconvert myslides.ipynb --to slides --post serve\fR
+.PP
+Multiple notebooks can be given at the command line in a couple of
+different ways:
+.IP
+\fBjupyter nbconvert notebook*.ipynb\fR
+.br
+\fBjupyter nbconvert notebook1.ipynb notebook2.ipynb\fR
+.PP
+or you can specify the notebooks list in a config file, containing::
+.PP
+c.NbConvertApp.notebooks = ["my_notebook.ipynb"]
+.IP
+\fBjupyter nbconvert --config mycfg.py\fR

@@ -1,0 +1,2 @@
+Test-Command: env HOME=$AUTOPKGTEST_TMP python3 -m pytest -k 'not (webpdf or convert_full_qualified_name or post_processor)'
+Depends: @, python3-pytest, python3-ipykernel, pandoc, texlive-xetex, texlive-fonts-recommended, texlive-plain-generic

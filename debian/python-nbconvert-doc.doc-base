@@ -1,0 +1,9 @@
+Document: python-nbconvert-doc
+Title: NBConvert Documentation
+Author: Jupyter Development Team
+Abstract: Sphinx documentation for nbconvert
+Section: Programming/Python
+
+Format: HTML
+Index: /usr/share/doc/python-nbconvert-doc/html/index.html
+Files: /usr/share/doc/python-nbconvert-doc/html/*
