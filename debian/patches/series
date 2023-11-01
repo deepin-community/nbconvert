@@ -1,4 +1,11 @@
+fix_missing_classic_style_css.patch
 0002-Disable-downloading-CSS-from-the-web-since-we-can-co.patch
 0004-privacy-breaches.patch
 0005-Patch-out-obsolete-grffile-from-latex-template.patch
 0006-Fix-invalid-escape-sequence-in-docstrings.patch
+0005-Vendor-mistune-0.8.4.patch
+0006-Set-nbsphinx_allow_errors-in-sphinx-conf.patch
+0007-fix-SyntaxError:_invalid_escape_sequence.patch
+0008-dont-use-intersphinx-during-build.patch
+0009-Skip-test_default_config-due-to-jupyter-core-4.11.2-.patch
+0010-fix-test_errors_print_traceback.patch
