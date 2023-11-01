@@ -1,0 +1,28 @@
+From 30329919be51965cbd7fed714ae6c17d7fa711da Mon Sep 17 00:00:00 2001
+From: Steven Silvester <steven.silvester@ieee.org>
+Date: Tue, 25 Apr 2023 12:05:41 -0500
+Subject: [PATCH] fix test_errors_print_traceback
+
+Origin: https://github.com/jupyter/nbconvert/pull/1985/
+Applied-upstream: yes
+Bug-Debian: https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=1041483
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/nbclient/+bug/2028176
+
+---
+ nbconvert/tests/test_nbconvertapp.py | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/nbconvert/tests/test_nbconvertapp.py b/nbconvert/tests/test_nbconvertapp.py
+index 17feb64a8..a05d59268 100644
+--- a/nbconvert/tests/test_nbconvertapp.py
++++ b/nbconvert/tests/test_nbconvertapp.py
+@@ -431,7 +431,8 @@ def test_errors_print_traceback(self):
+             )
+             assert 'print("Some text before the error")' in error_output
+             assert 'raise RuntimeError("This is a deliberate exception")' in error_output
+-            assert "RuntimeError: This is a deliberate exception" in error_output
++            assert "RuntimeError" in error_output
++            assert "This is a deliberate exception" in error_output
+ 
+     def test_fenced_code_blocks_markdown(self):
+         """

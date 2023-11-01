@@ -1,17 +1,15 @@
-Description: Fix invalid escape sequence in docstrings
-Author: Gordon Ball <gordon@chronitis.net>
+From: Gordon Ball <gordon@chronitis.net>
 Date: Fri, 19 Feb 2021 14:38:08 +0000
-Forwarded: https://github.com/jupyter/nbconvert/issues/1631
+Subject: Fix invalid escape sequence in docstrings
 
+Forwarded: https://github.com/jupyter/nbconvert/issues/1631
 ---
  nbconvert/filters/markdown_mistune.py | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
-diff --git a/nbconvert/filters/markdown_mistune.py b/nbconvert/filters/markdown_mistune.py
-index ff209f3..aa0ecc9 100644
---- a/nbconvert/filters/markdown_mistune.py
-+++ b/nbconvert/filters/markdown_mistune.py
-@@ -76,7 +76,7 @@ class MathInlineLexer(mistune.InlineLexer):
+--- nbconvert.orig/nbconvert/filters/markdown_mistune.py
++++ nbconvert/nbconvert/filters/markdown_mistune.py
+@@ -79,7 +79,7 @@
      defined by the MathInlineGrammar.
  
      In particular this grabs ``$$...$$``, ``\\[...\\]``, ``\\(...\\)``, ``$...$``,

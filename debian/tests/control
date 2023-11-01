@@ -1,2 +1,10 @@
-Test-Command: env HOME=$AUTOPKGTEST_TMP python3 -m pytest -k 'not (webpdf or convert_full_qualified_name or post_processor)'
-Depends: @, python3-pytest, python3-ipykernel, pandoc, texlive-xetex, texlive-fonts-recommended, texlive-plain-generic
+Test-Command: env HOME=$AUTOPKGTEST_TMP python3 -m pytest -W ignore::DeprecationWarning -k 'not (webpdf or convert_full_qualified_name or post_processor or execute_multiple_notebooks or execute_widgets)'
+Depends: pandoc,
+         python3-ipykernel,
+         python3-ipywidgets,
+         python3-pytest,
+         texlive-fonts-recommended,
+         texlive-plain-generic,
+         texlive-xetex,
+         @
+Restrictions: allow-stderr

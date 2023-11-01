@@ -1,0 +1,2 @@
+# it's a test file, so it looks bad by design!
+nbconvert source: source-is-missing [nbconvert/tests/files/notebook1.html]

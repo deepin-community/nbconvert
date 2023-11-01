@@ -1,0 +1,23 @@
+Description: Since at least nbconvert 6.5.3-1 importing _mistune.py fails
+ with "SyntaxError: invalid escape sequence". This patch prevents that
+ issue, although I'm not 100% sure if it fixes the underlaying issue.
+ Given that the escape sequence is invalid, I don't think it ever worked
+ properly, but I could be wrong. Given that the escape sequence is invalid,
+ I don't know what exactly was intended. mistune moved on to a newer
+ version, I couldn't find the code or anything like it in the newer
+ code base.
+Author: Paul Gevers <elbrus@debian.org>
+Forwarded: not-needed
+Index: nbconvert/nbconvert/filters/_mistune.py
+===================================================================
+--- nbconvert.orig/nbconvert/filters/_mistune.py
++++ nbconvert/nbconvert/filters/_mistune.py
+@@ -432,7 +432,7 @@ class BlockLexer(object):
+         for i, line in enumerate(cells):
+             for c, cell in enumerate(line):
+                 # de-escape any pipe inside the cell here
+-                cells[i][c] = re.sub('\\\\\|', '|', cell)
++                cells[i][c] = re.sub(r'\|', '|', cell)
+ 
+         return cells
+ 

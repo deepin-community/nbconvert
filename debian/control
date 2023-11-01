@@ -3,30 +3,34 @@ Maintainer: Debian Python Team <team+python@tracker.debian.org>
 Uploaders: Julien Puydt <jpuydt@debian.org>, Gordon Ball <gordon@chronitis.net>
 Section: python
 Priority: optional
-Standards-Version: 4.6.0
+Standards-Version: 4.6.1
 Homepage: https://github.com/jupyter/nbconvert
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                pandoc,
                python3-all,
-               python3-bleach,
+               python3-bleach (>= 5.0.0),
+               python3-bs4,
                python3-defusedxml,
                python3-entrypoints,
+               python3-ipykernel <!nodoc>,
                python3-ipython <!nodoc>,
                python3-jinja2,
-               python3-nbclient,
                python3-jupyter-core,
                python3-jupyterlab-pygments,
-               python3-mistune,
+               python3-lxml,
+               python3-nbclient,
                python3-nbformat,
-               python3-nbsphinx (>= 0.2.14) <!nodoc>,
-               python3-pandocfilters (>= 1.4),
+               python3-nbsphinx <!nodoc>,
+               python3-packaging,
+               python3-pandocfilters,
                python3-pygments,
                python3-setuptools,
                python3-sphinx <!nodoc>,
                python3-sphinx-rtd-theme <!nodoc>,
                python3-testpath,
-               python3-traitlets,
+               python3-tinycss2,
+               python3-traitlets
 Vcs-Git: https://salsa.debian.org/python-team/packages/nbconvert.git
 Vcs-Browser: https://salsa.debian.org/python-team/packages/nbconvert
 Testsuite: autopkgtest-pkg-python
@@ -34,12 +38,11 @@ Rules-Requires-Root: no
 
 Package: python3-nbconvert
 Architecture: all
-Depends: ${misc:Depends},
-         ${python3:Depends}
+Depends: ${misc:Depends}, ${python3:Depends}, python3-packaging
 Suggests: python-nbconvert-doc,
           texlive-fonts-recommended,
           texlive-plain-generic,
-          texlive-xetex,
+          texlive-xetex
 Recommends: pandoc, python3-jupyter-client
 Description: Jupyter notebook conversion (Python 3)
  Jupyter nbconvert converts notebooks to various other formats
@@ -49,10 +52,10 @@ Description: Jupyter notebook conversion (Python 3)
 
 Package: jupyter-nbconvert
 Architecture: all
-Depends: python3-nbconvert (= ${binary:Version}),
+Depends: jupyter-core,
+         python3-nbconvert (= ${binary:Version}),
          ${misc:Depends},
-         ${python3:Depends},
-         jupyter-core
+         ${python3:Depends}
 Section: utils
 Description: Jupyter notebook conversion (scripts)
  Jupyter nbconvert converts notebooks to various other formats
@@ -68,7 +71,6 @@ Depends: libjs-jquery,
          libjs-requirejs,
          ${misc:Depends},
          ${sphinxdoc:Depends}
-Built-Using: ${sphinxdoc:Built-Using}
 Section: doc
 Description: Jupyter notebook conversion (documentation)
  Jupyter nbconvert converts notebooks to various other formats

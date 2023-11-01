@@ -5,18 +5,23 @@ include .mailmap
 include MANIFEST.in
 include nbconvert/templates/skeleton/Makefile
 include nbconvert/tests/README.md
+include pyproject.toml
+include setup.py
 
 # Documentation
 graft docs
 exclude docs/\#*
 exclude .readthedocs.yml
 exclude codecov.yml
+exclude .pre-commit-config.yaml
+exclude .git-blame-ignore-revs
+exclude .prettierignore
 
 # Examples
 graft examples
 
 # docs subdirs we want to skip
-prune docs/build
+prune docs/_build
 prune docs/gh-pages
 prune docs/dist
 

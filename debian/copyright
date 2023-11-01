@@ -16,6 +16,11 @@ Copyright: Jupyter Development Team
 License: BSD-3-clause
 Comment: CSS files from Jupyterlab
 
+Files: debian/patches/0005-Vendor-mistune-0.8.4.patch
+Copyright: 2014-2018 Hsiaoming Yang
+License: BSD-3-clause
+Comment: vendored copy of mistune 0.8.4
+
 License: BSD-3-clause
  All rights reserved.
  .

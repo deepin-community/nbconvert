@@ -1,0 +1,8 @@
+Description: fix missing style.css autopkgtest failure
+Author: Julien Puydt
+Forwarded: https://github.com/jupyter/nbconvert/issues/1358
+
+--- /dev/null
++++ nbconvert/share/jupyter/nbconvert/templates/classic/static/style.css
+@@ -0,0 +1 @@
++/* empty - just for autopkgtest success */

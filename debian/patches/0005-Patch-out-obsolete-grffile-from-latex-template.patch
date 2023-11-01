@@ -7,16 +7,16 @@ https://github.com/jupyter/nbconvert/issues/1140
 
 Patch from Christian Christensen.
 ---
- nbconvert/templates/latex/base.tplx | 9 ---------
- 1 file changed, 9 deletions(-)
+ share/jupyter/nbconvert/templates/latex/base.tex.j2 | 15 ---------------
+ 1 file changed, 15 deletions(-)
 
 --- nbconvert.orig/share/jupyter/nbconvert/templates/latex/base.tex.j2
 +++ nbconvert/share/jupyter/nbconvert/templates/latex/base.tex.j2
-@@ -50,21 +50,6 @@
-     \usepackage{eurosym} % defines \euro
-     \usepackage[mathletters]{ucs} % Extended unicode (utf-8) support
+@@ -57,21 +57,6 @@
+     \fi
+ 
      \usepackage{fancyvrb} % verbatim replacement that allows latex
--    \usepackage{grffile} % extends the file name processing of package graphics 
+-    \usepackage{grffile} % extends the file name processing of package graphics
 -                         % to support a larger range
 -    \makeatletter % fix for old versions of grffile with XeLaTeX
 -    \@ifpackagelater{grffile}{2019/11/01}

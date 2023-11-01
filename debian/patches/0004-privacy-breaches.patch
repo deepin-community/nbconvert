@@ -4,8 +4,10 @@ Subject: patch away cloudflare to avoid privacy breaches
 
 Forwarded: no (Debian-specific)
 ---
- docs/source/customizing.ipynb | 12 ++++++------
- 1 file changed, 6 insertions(+), 6 deletions(-)
+ .../nbconvert/templates/classic_clone/index.html.j2          |  4 ++--
+ nbconvert/exporters/html.py                                  | 12 ++++++------
+ nbconvert/tests/files/notebook1.html                         |  4 ++--
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
 --- nbconvert.orig/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2
 +++ nbconvert/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2
@@ -14,33 +16,51 @@ Forwarded: no (Debian-specific)
  {%- block html_head_js -%}
  {%- block html_head_js_jquery -%}
 -<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-+<script src="file://usr/share/javascript/jquery/jquery.min.js"></script>
++<script src="file:///usr/share/javascript/jquery/jquery.min.js"></script>
  {%- endblock html_head_js_jquery -%}
  {%- block html_head_js_requirejs -%}
 -<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-+<script src="file://usr/share/javascript/requirejs/require.min.js"></script>
++<script src="file:///usr/share/javascript/requirejs/require.min.js"></script>
  {%- endblock html_head_js_requirejs -%}
  {%- endblock html_head_js -%}
  
 --- nbconvert.orig/nbconvert/exporters/html.py
 +++ nbconvert/nbconvert/exporters/html.py
-@@ -37,7 +37,7 @@
-         help="If anchor links should be included or not.").tag(config=True)
+@@ -100,29 +100,29 @@
+     )
  
      require_js_url = Unicode(
 -        "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js",
-+            "file://usr/share/javascript/requirejs/require.min.js",
++            "file:///usr/share/javascript/requirejs/require.min.js",
          help="""
          URL to load require.js from.
  
-@@ -46,7 +46,7 @@
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
+     ).tag(config=True)
+ 
+     mathjax_url = Unicode(
+-        "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe",
++            "file:///usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full,Safe",
+         help="""
+         URL to load Mathjax from.
+ 
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
      ).tag(config=True)
  
      jquery_url = Unicode(
 -        "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js",
-+            "file://usr/share/javascript/jquery/jquery.min.js",
++            "file:///usr/share/javascript/jquery/jquery.min.js",
          help="""
          URL to load jQuery from.
+ 
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
+     ).tag(config=True)
  
 --- nbconvert.orig/nbconvert/tests/files/notebook1.html
 +++ nbconvert/nbconvert/tests/files/notebook1.html
@@ -49,7 +69,7 @@ Forwarded: no (Debian-specific)
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
  
 -<title>notebook1</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
-+<title>notebook1</title><script src="file:/usr/share/javascript/jquery/jquery.min.js"></script><script src="file://usr/share/javascript/requirejs/require.min.js"></script>
++<title>notebook1</title><script src="file:///usr/share/javascript/jquery/jquery.min.js"></script><script src="file:///usr/share/javascript/requirejs/require.min.js"></script>
  
  <style type="text/css">
    pre { line-height: 125%; margin: 0; }
@@ -57,17 +77,8 @@ Forwarded: no (Debian-specific)
  
  
  <!-- Load mathjax -->
--    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML-full,Safe"> </script>
-+    <script src="file://usr/share/javascript/mathjax/MathJax.js?config=TeX-MML-AM_CHTML-full,Safe"> </script>
+-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe"> </script>
++    <script src="file:///usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full,Safe"> </script>
      <!-- MathJax configuration -->
      <script type="text/x-mathjax-config">
      init_mathjax = function() {
---- nbconvert.orig/share/jupyter/nbconvert/templates/base/mathjax.html.j2
-+++ nbconvert/share/jupyter/nbconvert/templates/base/mathjax.html.j2
-@@ -1,5 +1,5 @@
- 
--{%- macro mathjax(url="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-MML-AM_CHTML-full,Safe") -%}
-+{%- macro mathjax(url="file://usr/share/javascript/mathjax/MathJax.js?config=TeX-MML-AM_CHTML-full,Safe") -%}
-     <!-- Load mathjax -->
-     <script src="{{url}}"> </script>
-     <!-- MathJax configuration -->
