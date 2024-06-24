@@ -9,10 +9,10 @@ export PYBUILD_TEST_ARGS=-v
 
 override_dh_auto_configure:
 	dh_auto_configure
-	mkdir -p share/jupyter/nbconvert/templates/lab/static
-	cp debian/missing-sources/nbconvert-css@3.0.7/style/index.css share/jupyter/nbconvert/templates/lab/static/index.css
-	cp debian/missing-sources/theme-light-extension@3.0.7/style/variables.css share/jupyter/nbconvert/templates/lab/static/theme-light.css
-	cp debian/missing-sources/theme-dark-extension@3.0.7/style/variables.css share/jupyter/nbconvert/templates/lab/static/theme-dark.css
+	mkdir -p share/templates/lab/static
+	cp debian/missing-sources/nbconvert-css@3.0.7/style/index.css share/templates/lab/static/index.css
+	cp debian/missing-sources/theme-light-extension@3.0.7/style/variables.css share/templates/lab/static/theme-light.css
+	cp debian/missing-sources/theme-dark-extension@3.0.7/style/variables.css share/templates/lab/static/theme-dark.css
 
 override_dh_auto_test:
 	@echo "Disabling autotests: entry points are not available yet!"
@@ -28,4 +28,4 @@ ifeq (,$(findstring nodoc, $(DEB_BUILD_OPTIONS)))
 endif
 
 override_dh_installchangelogs:
-	dh_installchangelogs -k docs/source/changelog.rst
+	dh_installchangelogs -k CHANGELOG.md

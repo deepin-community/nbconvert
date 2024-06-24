@@ -15,12 +15,17 @@ import warnings
 from urllib.parse import quote
 from xml.etree.ElementTree import Element
 
+import bleach
+
 # defusedxml does safe(r) parsing of untrusted XML data
-from defusedxml import ElementTree
+from defusedxml import ElementTree  # type:ignore[import-untyped]
+
+from nbconvert.preprocessors.sanitize import _get_default_css_sanitizer
 
 __all__ = [
     "wrap_text",
     "html2text",
+    "clean_html",
     "add_anchor",
     "strip_dollars",
     "strip_files_prefix",
@@ -51,7 +56,7 @@ def wrap_text(text, width=100):
     """
 
     split_text = text.split("\n")
-    wrp = map(lambda x: textwrap.wrap(x, width), split_text)
+    wrp = map(lambda x: textwrap.wrap(x, width), split_text)  # noqa: C417
     wrpd = map("\n".join, wrp)
     return "\n".join(wrpd)
 
@@ -73,6 +78,24 @@ def html2text(element):
         text += html2text(child)
     text += element.tail or ""
     return text
+
+
+def clean_html(element):
+    """Clean an html element."""
+    element = element.decode() if isinstance(element, bytes) else str(element)
+    kwargs = {}
+    css_sanitizer = _get_default_css_sanitizer()
+    if css_sanitizer:
+        kwargs["css_sanitizer"] = css_sanitizer
+    return bleach.clean(
+        element,
+        tags=[*bleach.ALLOWED_TAGS, "div", "pre", "code", "span", "table", "tr", "td"],
+        attributes={
+            **bleach.ALLOWED_ATTRIBUTES,
+            "*": ["class", "id"],
+        },
+        **kwargs,
+    )
 
 
 def _convert_header_id(header_contents):
@@ -151,7 +174,7 @@ def strip_files_prefix(text):
     """
     cleaned_text = files_url_pattern.sub(r"\1=\2", text)
     cleaned_text = markdown_url_pattern.sub(r"\1[\2](\3)", cleaned_text)
-    return cleaned_text
+    return cleaned_text  # noqa: RET504
 
 
 def comment_lines(text, prefix="# "):
@@ -207,7 +230,8 @@ def ipython2python(code):
     except ImportError:
         warnings.warn(
             "IPython is needed to transform IPython syntax to pure Python."
-            " Install ipython if you need this functionality."
+            " Install ipython if you need this functionality.",
+            stacklevel=2,
         )
         return code
     else:
@@ -245,7 +269,7 @@ def prevent_list_blocks(s):
     out = re.sub(r"(^\s*)\-", r"\1\-", out)
     out = re.sub(r"(^\s*)\+", r"\1\+", out)
     out = re.sub(r"(^\s*)\*", r"\1\*", out)
-    return out
+    return out  # noqa: RET504
 
 
 def strip_trailing_newline(text):

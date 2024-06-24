@@ -6,18 +6,24 @@
 import asyncio
 import concurrent.futures
 import os
+import subprocess
+import sys
 import tempfile
+from importlib import util as importlib_util
 
 from traitlets import Bool, default
 
 from .html import HTMLExporter
+
+PLAYWRIGHT_INSTALLED = importlib_util.find_spec("playwright") is not None
+IS_WINDOWS = os.name == "nt"
 
 
 class WebPDFExporter(HTMLExporter):
     """Writer designed to write to PDF files.
 
     This inherits from :class:`HTMLExporter`. It creates the HTML using the
-    template machinery, and then run pyppeteer to create a pdf.
+    template machinery, and then run playwright to create a pdf.
     """
 
     export_from_notebook = "PDF via HTML"
@@ -37,8 +43,6 @@ class WebPDFExporter(HTMLExporter):
         Set to True to match behavior of LaTeX based PDF generator
         """,
     ).tag(config=True)
-
-    output_mimetype = "text/html"
 
     @default("file_extension")
     def _file_extension_default(self):
@@ -64,37 +68,48 @@ class WebPDFExporter(HTMLExporter):
         """,
     ).tag(config=True)
 
-    def _check_launch_reqs(self):
-        try:
-            from pyppeteer import launch
-            from pyppeteer.util import check_chromium
-        except ModuleNotFoundError as e:
-            raise RuntimeError(
-                "Pyppeteer is not installed to support Web PDF conversion. "
-                "Please install `nbconvert[webpdf]` to enable."
-            ) from e
-        if not self.allow_chromium_download and not check_chromium():
-            raise RuntimeError(
-                "No suitable chromium executable found on the system. "
-                "Please use '--allow-chromium-download' to allow downloading one."
-            )
-        return launch
-
-    def run_pyppeteer(self, html):
-        """Run pyppeteer."""
+    def run_playwright(self, html):
+        """Run playwright."""
 
         async def main(temp_file):
+            """Run main playwright script."""
             args = ["--no-sandbox"] if self.disable_sandbox else []
-            browser = await self._check_launch_reqs()(
-                handleSIGINT=False, handleSIGTERM=False, handleSIGHUP=False, args=args
-            )
-            page = await browser.newPage()
-            await page.emulateMedia("screen")
-            await page.waitFor(100)
-            await page.goto(f"file://{temp_file.name}", waitUntil="networkidle0")
-            await page.waitFor(100)
+            try:
+                from playwright.async_api import async_playwright  # type: ignore[import-not-found]
+            except ModuleNotFoundError as e:
+                msg = (
+                    "Playwright is not installed to support Web PDF conversion. "
+                    "Please install `nbconvert[webpdf]` to enable."
+                )
+                raise RuntimeError(msg) from e
 
-            pdf_params = {"printBackground": True}
+            if self.allow_chromium_download:
+                cmd = [sys.executable, "-m", "playwright", "install", "chromium"]
+                subprocess.check_call(cmd)  # noqa: S603
+
+            playwright = await async_playwright().start()
+            chromium = playwright.chromium
+
+            try:
+                browser = await chromium.launch(
+                    handle_sigint=False, handle_sigterm=False, handle_sighup=False, args=args
+                )
+            except Exception as e:
+                msg = (
+                    "No suitable chromium executable found on the system. "
+                    "Please use '--allow-chromium-download' to allow downloading one,"
+                    "or install it using `playwright install chromium`."
+                )
+                await playwright.stop()
+                raise RuntimeError(msg) from e
+
+            page = await browser.new_page()
+            await page.emulate_media(media="print")
+            await page.wait_for_timeout(100)
+            await page.goto(f"file://{temp_file.name}", wait_until="networkidle")
+            await page.wait_for_timeout(100)
+
+            pdf_params = {"print_background": True}
             if not self.paginate:
                 # Floating point precision errors cause the printed
                 # PDF from spilling over a new page by a pixel fraction.
@@ -116,9 +131,10 @@ class WebPDFExporter(HTMLExporter):
                         "height": min(height, 200 * 72),
                     }
                 )
-            pdf_data = await page.pdf(pdf_params)
+            pdf_data = await page.pdf(**pdf_params)
 
             await browser.close()
+            await playwright.stop()
             return pdf_data
 
         pool = concurrent.futures.ThreadPoolExecutor()
@@ -134,22 +150,28 @@ class WebPDFExporter(HTMLExporter):
             # TODO: when dropping Python 3.6, use
             # pdf_data = pool.submit(asyncio.run, main(temp_file)).result()
             def run_coroutine(coro):
-                loop = asyncio.new_event_loop()
+                """Run an internal coroutine."""
+                loop = (
+                    asyncio.ProactorEventLoop()  # type:ignore[attr-defined]
+                    if IS_WINDOWS
+                    else asyncio.new_event_loop()
+                )
+
                 asyncio.set_event_loop(loop)
                 return loop.run_until_complete(coro)
 
             pdf_data = pool.submit(run_coroutine, main(temp_file)).result()
         finally:
-            # Ensure the file is deleted even if pypeteer raises an exception
+            # Ensure the file is deleted even if playwright raises an exception
             os.unlink(temp_file.name)
         return pdf_data
 
     def from_notebook_node(self, nb, resources=None, **kw):
-        self._check_launch_reqs()
+        """Convert from a notebook node."""
         html, resources = super().from_notebook_node(nb, resources=resources, **kw)
 
         self.log.info("Building PDF")
-        pdf_data = self.run_pyppeteer(html)
+        pdf_data = self.run_playwright(html)
         self.log.info("PDF successfully created")
 
         # convert output extension to pdf

@@ -1,0 +1,31 @@
+From: Gordon Ball <gordon@chronitis.net>
+Date: Fri, 19 Feb 2021 14:38:08 +0000
+Subject: Fix invalid escape sequence in docstrings
+
+Forwarded: https://github.com/jupyter/nbconvert/issues/1631
+---
+ nbconvert/filters/markdown_mistune.py | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/nbconvert/filters/markdown_mistune.py b/nbconvert/filters/markdown_mistune.py
+index 02ab346..b7db685 100644
+--- a/nbconvert/filters/markdown_mistune.py
++++ b/nbconvert/filters/markdown_mistune.py
+@@ -109,7 +109,7 @@ if MISTUNE_V3:  # Parsers for Mistune >= 3.0.0
+         r"""This interprets the content of LaTeX style math objects.
+ 
+         In particular this grabs ``$$...$$``, ``\\[...\\]``, ``\\(...\\)``, ``$...$``,
+-        and ``\begin{foo}...\end{foo}`` styles for declaring mathematics. It strips
++        and ``\\begin{foo}...\\end{foo}`` styles for declaring mathematics. It strips
+         delimiters from all these varieties, and extracts the type of environment
+         in the last case (``foo`` in this example).
+         """
+@@ -209,7 +209,7 @@ else:  # Parsers for Mistune >= 2.0.0 < 3.0.0
+         r"""This interprets the content of LaTeX style math objects.
+ 
+         In particular this grabs ``$$...$$``, ``\\[...\\]``, ``\\(...\\)``, ``$...$``,
+-        and ``\begin{foo}...\end{foo}`` styles for declaring mathematics. It strips
++        and ``\\begin{foo}...\\end{foo}`` styles for declaring mathematics. It strips
+         delimiters from all these varieties, and extracts the type of environment
+         in the last case (``foo`` in this example).
+         """

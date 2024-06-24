@@ -1,5 +1,6 @@
 Test-Command: env HOME=$AUTOPKGTEST_TMP python3 -m pytest -W ignore::DeprecationWarning -k 'not (webpdf or convert_full_qualified_name or post_processor or execute_multiple_notebooks or execute_widgets)'
 Depends: pandoc,
+         python3-flaky,
          python3-ipykernel,
          python3-ipywidgets,
          python3-pytest,

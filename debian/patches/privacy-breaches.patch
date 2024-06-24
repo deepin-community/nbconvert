@@ -1,0 +1,82 @@
+From: Julien Puydt <jpuydt@debian.org>
+Date: Thu, 20 Jun 2019 07:50:22 +0000
+Subject: patch away cloudflare to avoid privacy breaches
+
+Forwarded: no (Debian-specific)
+---
+ .../nbconvert/templates/classic_clone/index.html.j2          |  4 ++--
+ nbconvert/exporters/html.py                                  | 12 ++++++------
+ share/templates/base/mathjax.html.j2                         |  2 +-
+ 3 files changed, 9 insertions(+), 9 deletions(-)
+
+diff --git a/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2 b/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2
+index 23d4353..e78a4ac 100644
+--- a/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2
++++ b/docs/api_examples/template_path/project_templates/nbconvert/templates/classic_clone/index.html.j2
+@@ -13,10 +13,10 @@
+ 
+ {%- block html_head_js -%}
+ {%- block html_head_js_jquery -%}
+-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
++<script src="file:///usr/share/javascript/jquery/jquery.min.js"></script>
+ {%- endblock html_head_js_jquery -%}
+ {%- block html_head_js_requirejs -%}
+-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
++<script src="file:///usr/share/javascript/requirejs/require.min.js"></script>
+ {%- endblock html_head_js_requirejs -%}
+ {%- endblock html_head_js -%}
+ 
+diff --git a/nbconvert/exporters/html.py b/nbconvert/exporters/html.py
+index d63699c..6665f81 100644
+--- a/nbconvert/exporters/html.py
++++ b/nbconvert/exporters/html.py
+@@ -106,20 +106,20 @@ class HTMLExporter(TemplateExporter):
+     )
+ 
+     require_js_url = Unicode(
+-        "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js",
++            "file:///usr/share/javascript/requirejs/require.min.js",
+         help="""
+         URL to load require.js from.
+ 
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
+     ).tag(config=True)
+ 
+     mathjax_url = Unicode(
+-        "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe",
++            "file:///usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full,Safe",
+         help="""
+         URL to load Mathjax from.
+ 
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
+     ).tag(config=True)
+ 
+@@ -133,11 +133,11 @@ class HTMLExporter(TemplateExporter):
+     )
+ 
+     jquery_url = Unicode(
+-        "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js",
++            "file:///usr/share/javascript/jquery/jquery.min.js",
+         help="""
+         URL to load jQuery from.
+ 
+-        Defaults to loading from cdnjs.
++        Defaults to loading from local directory.
+         """,
+     ).tag(config=True)
+ 
+diff --git a/share/templates/base/mathjax.html.j2 b/share/templates/base/mathjax.html.j2
+index e289888..1703191 100644
+--- a/share/templates/base/mathjax.html.j2
++++ b/share/templates/base/mathjax.html.j2
+@@ -1,5 +1,5 @@
+ 
+-{%- macro mathjax(url="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS_CHTML-full,Safe") -%}
++{%- macro mathjax(url="file:///usr/share/javascript/mathjax/MathJax.js?config=TeX-AMS_CHTML-full,Safe") -%}
+     <!-- Load mathjax -->
+     <script src="{{url}}"> </script>
+     <!-- MathJax configuration -->
