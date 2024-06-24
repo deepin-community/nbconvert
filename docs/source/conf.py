@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-#
 # nbconvert documentation build configuration file, created by
 # sphinx-quickstart on Tue Jun  9 17:11:30 2015.
 #
@@ -13,6 +11,10 @@
 # serve to show the default.
 
 import os
+import shutil
+from datetime import datetime, timezone
+
+HERE = os.path.dirname(__file__)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -20,8 +22,9 @@ import os
 # sys.path.insert(0, os.path.abspath('.'))
 
 # Automatically generate config_options.rst
-with open(os.path.join(os.path.dirname(__file__), "..", "autogen_config.py")) as f:
-    exec(compile(f.read(), "autogen_config.py", "exec"), {})
+with open(os.path.join(HERE, "..", "autogen_config.py")) as f:
+    exec(compile(f.read(), "autogen_config.py", "exec"), {})  # noqa: S102
+    print("Created docs for config options")
 
 # -- General configuration ------------------------------------------------
 
@@ -32,6 +35,7 @@ with open(os.path.join(os.path.dirname(__file__), "..", "autogen_config.py")) as
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "myst_parser",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
@@ -40,6 +44,14 @@ extensions = [
     "IPython.sphinxext.ipython_console_highlighting",
 ]
 
+try:
+    import enchant  # noqa: F401
+
+    extensions += ["sphinxcontrib.spelling"]
+except ImportError:
+    pass
+
+myst_enable_extensions = ["html_image"]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -57,13 +69,13 @@ master_doc = "index"
 
 # General information about the project.
 project = "nbconvert"
-from datetime import date
 
-year = date.today().year
+
+year = datetime.now(tz=timezone.utc).date().year
 copyright = "2015-%s, Jupyter Development Team" % year
 author = "Jupyter Development Team"
 
-extlinks = {"ghpull": ("https://github.com/jupyter/nbconvert/pull/%s", "PR #")}
+extlinks = {"ghpull": ("https://github.com/jupyter/nbconvert/pull/%s", "PR #%s")}
 
 linkcheck_ignore = [
     "https://github.com/jupyter/nbconvert/pull/",
@@ -74,9 +86,9 @@ linkcheck_ignore = [
 # built documents.
 #
 # Get information from _version.py and use it to generate version and release
-_version_py = "../../nbconvert/_version.py"
+_version_py = os.path.join(HERE, "../../nbconvert/_version.py")
 version_ns = {}
-exec(compile(open(_version_py).read(), _version_py, "exec"), version_ns)
+exec(compile(open(_version_py).read(), _version_py, "exec"), version_ns)  # noqa: SIM115, S102
 # The short X.Y version.
 version = "%i.%i" % version_ns["version_info"][:2]
 # The full version, including alpha/beta/rc tags.
@@ -87,7 +99,7 @@ release = version_ns["__version__"]
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -129,15 +141,7 @@ todo_include_todos = False
 
 # -- Options for HTML output ----------------------------------------------
 
-# Set on_rtd to whether we are building on readthedocs.org. We get this line of
-# code grabbed from docs.readthedocs.org
-on_rtd = os.environ.get("READTHEDOCS", None) == "True"
-
-if not on_rtd:  # only import and set the theme if we're building docs locally
-    import sphinx_rtd_theme
-
-    html_theme = "sphinx_rtd_theme"
-    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = "pydata_sphinx_theme"
 
 # otherwise, readthedocs.org uses their default theme, so no need to specify it
 
@@ -149,7 +153,10 @@ if not on_rtd:  # only import and set the theme if we're building docs locally
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-# html_theme_options = {}
+html_theme_options = {
+    # prefer browser defaults over custom JS keyboard event handlers
+    "navigation_with_keys": False,
+}
 
 # Add any paths that contain custom themes here, relative to this directory.
 # html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
@@ -315,3 +322,8 @@ intersphinx_mapping = {
     "jinja": ("http://jinja.pocoo.org/docs", None),
     "nbformat": ("https://nbformat.readthedocs.io/en/latest", None),
 }
+
+
+def setup(_):
+    dest = os.path.join(HERE, "changelog.md")
+    shutil.copy(os.path.join(HERE, "..", "..", "CHANGELOG.md"), dest)

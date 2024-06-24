@@ -1,8 +1,17 @@
-Description: fix missing style.css autopkgtest failure
-Author: Julien Puydt
-Forwarded: https://github.com/jupyter/nbconvert/issues/1358
+From: Debian Python Team <team+python@tracker.debian.org>
+Date: Sun, 14 Apr 2024 16:36:00 +0100
+Subject: fix missing style.css autopkgtest failure
 
+Forwarded: https://github.com/jupyter/nbconvert/issues/1358
+---
+ share/templates/classic/static/style.css | 1 +
+ 1 file changed, 1 insertion(+)
+ create mode 100644 share/templates/classic/static/style.css
+
+diff --git a/share/templates/classic/static/style.css b/share/templates/classic/static/style.css
+new file mode 100644
+index 0000000..4363215
 --- /dev/null
-+++ nbconvert/share/jupyter/nbconvert/templates/classic/static/style.css
++++ b/share/templates/classic/static/style.css
 @@ -0,0 +1 @@
 +/* empty - just for autopkgtest success */

@@ -8,23 +8,27 @@ import json
 import mimetypes
 import os
 from pathlib import Path
+from typing import Any, Dict, Optional, Tuple
 
 import jinja2
 import markupsafe
+from bs4 import BeautifulSoup
 from jupyter_core.paths import jupyter_path
-from traitlets import Bool, Unicode, default
+from traitlets import Bool, Unicode, default, validate
 from traitlets.config import Config
 
 if tuple(int(x) for x in jinja2.__version__.split(".")[:3]) < (3, 0, 0):
-    from jinja2 import contextfilter
+    from jinja2 import contextfilter  # type:ignore[attr-defined]
 else:
     from jinja2 import pass_context as contextfilter
 
 from jinja2.loaders import split_template_path
+from nbformat import NotebookNode
 
 from nbconvert.filters.highlight import Highlight2HTML
 from nbconvert.filters.markdown_mistune import IPythonRenderer, MarkdownWithMath
 from nbconvert.filters.widgetsdatatypefilter import WidgetsDataTypeFilter
+from nbconvert.utils.iso639_1 import iso639_1
 
 from .templateexporter import TemplateExporter
 
@@ -55,7 +59,7 @@ def find_lab_theme(theme_name):
     matching_themes = []
     theme_path = None
     for path in paths:
-        for (dirpath, dirnames, filenames) in os.walk(path):
+        for dirpath, dirnames, filenames in os.walk(path):
             # If it's a federated labextension that contains themes
             if "package.json" in filenames and "themes" in dirnames:
                 # TODO Find the theme name in the JS code instead?
@@ -70,13 +74,15 @@ def find_lab_theme(theme_name):
                     theme_path = Path(dirpath) / "themes" / labext_name
 
     if len(matching_themes) == 0:
-        raise ValueError(f'Could not find lab theme "{theme_name}"')
+        msg = f'Could not find lab theme "{theme_name}"'
+        raise ValueError(msg)
 
     if len(matching_themes) > 1:
-        raise ValueError(
+        msg = (
             f'Found multiple themes matching "{theme_name}": {matching_themes}. '
             "Please be more specific about which theme you want to use."
         )
+        raise ValueError(msg)
 
     return full_theme_name, theme_path
 
@@ -116,6 +122,15 @@ class HTMLExporter(TemplateExporter):
         Defaults to loading from cdnjs.
         """,
     ).tag(config=True)
+
+    mermaid_js_url = Unicode(
+        "https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.esm.min.mjs",
+        help="""
+        URL to load MermaidJS from.
+
+        Defaults to loading from cdnjs.
+        """,
+    )
 
     jquery_url = Unicode(
         "https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js",
@@ -157,6 +172,11 @@ class HTMLExporter(TemplateExporter):
         ),
     ).tag(config=True)
 
+    skip_svg_encoding = Bool(
+        False,
+        help=("Whether the svg to image data attribute encoding should occur"),
+    ).tag(config=True)
+
     embed_images = Bool(
         False, help="Whether or not to embed images as base64 in markdown cells."
     ).tag(config=True)
@@ -174,6 +194,7 @@ class HTMLExporter(TemplateExporter):
                         "text/html",
                         "text/markdown",
                         "image/svg+xml",
+                        "text/vnd.mermaid",
                         "text/latex",
                         "image/png",
                         "image/jpeg",
@@ -183,8 +204,26 @@ class HTMLExporter(TemplateExporter):
                 "HighlightMagicsPreprocessor": {"enabled": True},
             }
         )
-        c.merge(super().default_config)
+        if super().default_config:
+            c2 = super().default_config.copy()
+            c2.merge(c)
+            c = c2
         return c
+
+    language_code = Unicode(
+        "en", help="Language code of the content, should be one of the ISO639-1"
+    ).tag(config=True)
+
+    @validate("language_code")
+    def _valid_language_code(self, proposal):
+        if self.language_code not in iso639_1:
+            self.log.warning(
+                '"%s" is not an ISO 639-1 language code. '
+                'It has been replaced by the default value "en".',
+                self.language_code,
+            )
+            return proposal["trait"].default_value
+        return proposal["value"]
 
     @contextfilter
     def markdown2html(self, context, source):
@@ -204,15 +243,21 @@ class HTMLExporter(TemplateExporter):
         return MarkdownWithMath(renderer=renderer).render(source)
 
     def default_filters(self):
+        """Get the default filters."""
         yield from super().default_filters()
         yield ("markdown2html", self.markdown2html)
 
-    def from_notebook_node(self, nb, resources=None, **kw):
+    def from_notebook_node(  # type:ignore[explicit-override, override]
+        self, nb: NotebookNode, resources: Optional[Dict[str, Any]] = None, **kw: Any
+    ) -> Tuple[str, Dict[str, Any]]:
+        """Convert from notebook node."""
         langinfo = nb.metadata.get("language_info", {})
         lexer = langinfo.get("pygments_lexer", langinfo.get("name", None))
         highlight_code = self.filters.get(
             "highlight_code", Highlight2HTML(pygments_lexer=lexer, parent=self)
         )
+
+        resources = self._init_resources(resources)
 
         filter_data_type = WidgetsDataTypeFilter(
             notebook_metadata=self._nb_metadata, parent=self, resources=resources
@@ -220,7 +265,22 @@ class HTMLExporter(TemplateExporter):
 
         self.register_filter("highlight_code", highlight_code)
         self.register_filter("filter_data_type", filter_data_type)
-        return super().from_notebook_node(nb, resources, **kw)
+        html, resources = super().from_notebook_node(nb, resources, **kw)
+        soup = BeautifulSoup(html, features="html.parser")
+        # Add image's alternative text
+        missing_alt = 0
+        for elem in soup.select("img:not([alt])"):
+            elem.attrs["alt"] = "No description has been provided for this image"
+            missing_alt += 1
+        if missing_alt:
+            self.log.warning("Alternative text is missing on %s image(s).", missing_alt)
+        # Set input and output focusable
+        for elem in soup.select(".jp-Notebook div.jp-Cell-inputWrapper"):
+            elem.attrs["tabindex"] = "0"
+        for elem in soup.select(".jp-Notebook div.jp-OutputArea-output"):
+            elem.attrs["tabindex"] = "0"
+
+        return str(soup), resources
 
     def _init_resources(self, resources):
         def resources_include_css(name):
@@ -245,21 +305,21 @@ class HTMLExporter(TemplateExporter):
                     # Replace asset url by a base64 dataurl
                     with open(theme_path / asset, "rb") as assetfile:
                         base64_data = base64.b64encode(assetfile.read())
-                        base64_data = base64_data.replace(b"\n", b"").decode("ascii")
+                        base64_str = base64_data.replace(b"\n", b"").decode("ascii")
 
-                        data = data.replace(
-                            local_url, f"url(data:{mime_type};base64,{base64_data})"
-                        )
+                        data = data.replace(local_url, f"url(data:{mime_type};base64,{base64_str})")
 
             code = """<style type="text/css">\n%s</style>""" % data
             return markupsafe.Markup(code)
 
-        def resources_include_js(name):
+        def resources_include_js(name, module=False):
+            """Get the resources include JS for a name. If module=True, import as ES module"""
             env = self.environment
-            code = """<script>\n%s</script>""" % (env.loader.get_source(env, name)[0])
+            code = f"""<script {'type="module"' if module else ""}>\n{env.loader.get_source(env, name)[0]}</script>"""
             return markupsafe.Markup(code)
 
         def resources_include_url(name):
+            """Get the resources include url for a name."""
             env = self.environment
             mime_type, encoding = mimetypes.guess_type(name)
             try:
@@ -277,7 +337,8 @@ class HTMLExporter(TemplateExporter):
                             data = f.read()
                             break
                 else:
-                    raise ValueError(f"No file {name!r} found in {searchpath!r}")
+                    msg = f"No file {name!r} found in {searchpath!r}"
+                    raise ValueError(msg)
             data = base64.b64encode(data)
             data = data.replace(b"\n", b"").decode("ascii")
             src = f"data:{mime_type};base64,{data}"
@@ -291,9 +352,12 @@ class HTMLExporter(TemplateExporter):
         resources["include_url"] = resources_include_url
         resources["require_js_url"] = self.require_js_url
         resources["mathjax_url"] = self.mathjax_url
+        resources["mermaid_js_url"] = self.mermaid_js_url
         resources["jquery_url"] = self.jquery_url
         resources["jupyter_widgets_base_url"] = self.jupyter_widgets_base_url
         resources["widget_renderer_url"] = self.widget_renderer_url
         resources["html_manager_semver_range"] = self.html_manager_semver_range
         resources["should_sanitize_html"] = self.sanitize_html
+        resources["language_code"] = self.language_code
+        resources["should_not_encode_svg"] = self.skip_svg_encoding
         return resources

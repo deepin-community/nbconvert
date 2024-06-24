@@ -1,0 +1,21 @@
+From: Gordon Ball <gordon@chronitis.net>
+Date: Sat, 8 Jan 2022 14:22:31 +0000
+Subject: Set nbsphinx_allow_errors in sphinx conf
+
+---
+ docs/source/conf.py | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/docs/source/conf.py b/docs/source/conf.py
+index f26770e..adb6f6c 100644
+--- a/docs/source/conf.py
++++ b/docs/source/conf.py
+@@ -53,6 +53,8 @@ except ImportError:
+ 
+ myst_enable_extensions = ["html_image"]
+ 
++nbsphinx_allow_errors = True
++
+ # Add any paths that contain templates here, relative to this directory.
+ templates_path = ["_templates"]
+ 

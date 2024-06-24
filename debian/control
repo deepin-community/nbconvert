@@ -8,27 +8,28 @@ Homepage: https://github.com/jupyter/nbconvert
 Build-Depends: debhelper-compat (= 13),
                dh-python,
                pandoc,
+               pybuild-plugin-pyproject,
                python3-all,
                python3-bleach (>= 5.0.0),
                python3-bs4,
                python3-defusedxml,
-               python3-entrypoints,
+               python3-hatchling,
                python3-ipykernel <!nodoc>,
                python3-ipython <!nodoc>,
                python3-jinja2,
                python3-jupyter-core,
                python3-jupyterlab-pygments,
-               python3-lxml,
+               python3-markupsafe,
+               python3-mistune,
+               python3-myst-parser <!nodoc>,
                python3-nbclient,
                python3-nbformat,
                python3-nbsphinx <!nodoc>,
                python3-packaging,
                python3-pandocfilters,
+               python3-pydata-sphinx-theme <!nodoc>,
                python3-pygments,
-               python3-setuptools,
                python3-sphinx <!nodoc>,
-               python3-sphinx-rtd-theme <!nodoc>,
-               python3-testpath,
                python3-tinycss2,
                python3-traitlets
 Vcs-Git: https://salsa.debian.org/python-team/packages/nbconvert.git
@@ -38,7 +39,7 @@ Rules-Requires-Root: no
 
 Package: python3-nbconvert
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}, python3-packaging
+Depends: ${misc:Depends}, ${python3:Depends}
 Suggests: python-nbconvert-doc,
           texlive-fonts-recommended,
           texlive-plain-generic,
@@ -65,6 +66,7 @@ Description: Jupyter notebook conversion (scripts)
 
 Package: python-nbconvert-doc
 Architecture: all
+Multi-Arch: foreign
 Build-Profiles: <!nodoc>
 Depends: libjs-jquery,
          libjs-mathjax,
