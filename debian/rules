@@ -10,9 +10,9 @@ export PYBUILD_TEST_ARGS=-v
 override_dh_auto_configure:
 	dh_auto_configure
 	mkdir -p share/templates/lab/static
-	cp debian/missing-sources/nbconvert-css@3.0.7/style/index.css share/templates/lab/static/index.css
-	cp debian/missing-sources/theme-light-extension@3.0.7/style/variables.css share/templates/lab/static/theme-light.css
-	cp debian/missing-sources/theme-dark-extension@3.0.7/style/variables.css share/templates/lab/static/theme-dark.css
+	cp debian/missing-sources/nbconvert-css@4.0.2/style/index.css share/templates/lab/static/index.css
+	cp debian/missing-sources/theme-light-extension@4.0.2/style/variables.css share/templates/lab/static/theme-light.css
+	cp debian/missing-sources/theme-dark-extension@4.0.2/style/variables.css share/templates/lab/static/theme-dark.css
 
 override_dh_auto_test:
 	@echo "Disabling autotests: entry points are not available yet!"
@@ -23,7 +23,8 @@ override_dh_auto_install:
 
 override_dh_sphinxdoc:
 ifeq (,$(findstring nodoc, $(DEB_BUILD_OPTIONS)))
-	PYTHONPATH=. python3 -m sphinx -b html docs/source debian/python-nbconvert-doc/usr/share/doc/python-nbconvert-doc/html
+	ln -nsf . share/nbconvert
+	PYTHONPATH=. JUPYTER_PATH=share python3 -m sphinx -b html docs/source debian/python-nbconvert-doc/usr/share/doc/python-nbconvert-doc/html
 	dh_sphinxdoc -O--buildsystem=pybuild
 endif
 
