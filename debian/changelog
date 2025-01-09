@@ -1,3 +1,22 @@
+nbconvert (7.16.5-1) unstable; urgency=medium
+
+  * Team upload.
+  * New upstream release.
+  * Explicitly depend on python3-tinycss2, since upstream now depends on
+    bleach[css] but Debian's python3-bleach package only Recommends:
+    python3-tinycss2.
+  * Use templates from this source package while building documentation, not
+    ones from the indirect circular build-dependency on python3-nbconvert.
+
+ -- Colin Watson <cjwatson@debian.org>  Thu, 02 Jan 2025 22:10:15 +0000
+
+nbconvert (7.16.4-2) unstable; urgency=medium
+
+  * Team upload.
+  * Update embedded jupyterlab CSS to 4.0.2 (closes: #1082665).
+
+ -- Colin Watson <cjwatson@debian.org>  Tue, 24 Sep 2024 17:53:28 -0700
+
 nbconvert (7.16.4-1) unstable; urgency=medium
 
   * Team upload.

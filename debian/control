@@ -39,7 +39,9 @@ Rules-Requires-Root: no
 
 Package: python3-nbconvert
 Architecture: all
-Depends: ${misc:Depends}, ${python3:Depends}
+Depends: python3-tinycss2,
+         ${misc:Depends},
+         ${python3:Depends}
 Suggests: python-nbconvert-doc,
           texlive-fonts-recommended,
           texlive-plain-generic,
